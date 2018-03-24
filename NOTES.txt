@@ -1,0 +1,20 @@
+.DSA and .RSA are PKCS#7 signature files
+
+https://docs.oracle.com/javase/tutorial/deployment/jar/intro.html
+
+> the signature file contains digest entries for the archive's files that look similar to the 
+> digest-value entries in the manifest. However, while the digest values in the manifest are 
+> computed from the files themselves, the digest values in the signature file are computed from 
+> the corresponding entries in the manifest. Signature files also contain a
+> digest value for the entire manifest (see the SHA1-Digest-Manifest header in
+> the above example).
+
+> When a signed JAR file is being verified, the digests of each of its files
+> are re-computed and compared with the digests recorded in the manifest to
+> ensure that the contents of the JAR file haven't changed since it was
+> signed. As an additional check, digest values for the manifest file itself
+> are re-computed and compared against the values recorded in the signature
+> file.
+
+- Implication that a JAR with additional unsigned files can still pass validation (probably ignore 
+even if non-standard?)
