@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JarVerify.Jar
+namespace JarVerify.Container
 {
     /// <summary>
     /// An actual JAR (ZIP) implementation. We are always read-only: verifying a signature 

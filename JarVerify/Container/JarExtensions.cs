@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JarVerify.Jar
+namespace JarVerify.Container
 {
     public static class JarExtensions
     {
@@ -40,6 +40,43 @@ namespace JarVerify.Jar
             {
                 return hasher.SHA256(file);
             }
+        }
+
+        /// <summary>
+        /// Get only the files in the JAR that have no connection to the signing process 
+        /// </summary>
+        /// <param name="this"></param>
+        /// <returns>set of files which are not metadata/signing related</returns>
+        public static IEnumerable<string> NonSignatureFiles(this IJar @this)
+        {
+            string[] manifestExtensions = new string[]
+            {
+                ".RSA", 
+                ".DSA", 
+                ".MF", 
+                ".SF"
+            };
+
+            return @this.Files()
+                .Where(f =>
+                {
+                    if (f.ToForwardSlashes().StartsWith(@"META-INF/"))
+                    {
+                        // Is it a manifest or signature?
+                        if (manifestExtensions.Any(ext => 
+                            ext.Equals(Path.GetExtension(f), StringComparison.InvariantCultureIgnoreCase)))
+                        {
+                            return false;
+                        }
+
+                        return true;
+                    }
+                    else
+                    {
+                        // Not metadata
+                        return true;
+                    }
+                });
         }
     }
 }

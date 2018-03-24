@@ -17,6 +17,16 @@ namespace JarVerify.Cryptography
             _sha = SHA256Managed.Create();
         }
 
+        public byte[] SHA256(string str)
+        {
+            return SHA256(Encoding.UTF8.GetBytes(str));
+        }
+
+        public byte[] SHA256(byte[] bytes)
+        {
+            return _sha.ComputeHash(bytes);
+        }
+
         public byte[] SHA256(Stream file)
         {
             return _sha.ComputeHash(file);

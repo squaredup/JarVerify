@@ -18,3 +18,34 @@ https://docs.oracle.com/javase/tutorial/deployment/jar/intro.html
 
 - Implication that a JAR with additional unsigned files can still pass validation (probably ignore 
 even if non-standard?)
+
+https://docs.oracle.com/javase/7/docs/technotes/guides/jar/jar.html
+
+https://github.com/openjdk-mirror/jdk7u-jdk/blob/master/src/share/classes/sun/security/tools/JarSigner.java#L2143
+
+SignatureFile(MessageDigest digests[],
+                         Manifest mf,
+                         ManifestDigester md,
+                         String baseName,
+                         boolean signManifest)
+
+> encoder.encode(mde.digest(digests[i])
+	BASE64Encoder encoder = new JarBASE64Encoder();
+
+where digest[i] is MessageDigest  
+	base64()
+
+ ManifestDigester manDig = new ManifestDigester(mfRawBytes); <-- actual manifest bytes
+SignatureFile sf = new SignatureFile(digests, manifest, manDig, 
+                                 sigfile, signManifest);
+
+> For each entry in the manifest, verify the digest value in the manifest file
+> against a digest calculated over the actual data referenced in the "Name:"
+> attribute, which specifies either a relative file path or URL. If any of the
+> digest values don't match, then JAR file verification fails.
+
+> In the .SF file, the digest value for a specified source file is the hash of the three lines in the manifest file for the source file. <----
+https://docs.oracle.com/javase/7/docs/technotes/tools/windows/jarsigner.html
+
+* Newlines significant per entry
+* The hash of the manifest in the signature file will be MINUS the attributes at the top

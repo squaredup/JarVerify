@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JarVerify.Jar
+namespace JarVerify.Container
 {
     /// <summary>
     /// Interaction with the contents of a JAR 
