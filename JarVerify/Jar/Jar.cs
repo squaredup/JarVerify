@@ -86,7 +86,7 @@ namespace JarVerify.Jar
             return GetEntry(path) != null;
         }
 
-        public Stream OpenFile(string path)
+        public Stream Open(string path)
         {
             if (path.IsNullOrEmpty())
             {
@@ -103,6 +103,13 @@ namespace JarVerify.Jar
             {
                 return null;
             }
+        }
+
+        public IEnumerable<string> Files()
+        {
+            return _zip.Entries
+                .Where(e => e.Length != 0)
+                .Select(e => e.FullName);
         }
 
         #region IDisposable Support

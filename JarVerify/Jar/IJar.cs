@@ -17,7 +17,7 @@ namespace JarVerify.Jar
         /// </summary>
         /// <param name="path">path to the file to open</param>
         /// <returns>the raw data stream of the file, or null if no such file exists</returns>
-        Stream OpenFile(string path);
+        Stream Open(string path);
 
         /// <summary>
         /// Whether the given filename exists in the JAR
@@ -25,5 +25,12 @@ namespace JarVerify.Jar
         /// <param name="path">path to test for existence</param>
         /// <returns>whether or not the JAR contains this filename</returns>
         bool Contains(string path);
+
+        /// <summary>
+        /// Get the list of all relative file paths inside the JAR file. This includes only files - 
+        /// folder path names are omitted
+        /// </summary>
+        /// <returns>the list of all file paths inside the JAR</returns>
+        IEnumerable<string> Files();
     }
 }

@@ -41,12 +41,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cryptography\Hasher.cs" />
     <Compile Include="Exceptions\JarException.cs" />
     <Compile Include="Jar\IJar.cs" />
     <Compile Include="Jar\Jar.cs" />
+    <Compile Include="Jar\JarExtensions.cs" />
     <Compile Include="Manifest\IManifestParser.cs" />
     <Compile Include="Manifest\ManifestParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\ByteExtensions.cs" />
     <Compile Include="Util\StringExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
