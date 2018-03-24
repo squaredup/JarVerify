@@ -49,3 +49,7 @@ https://docs.oracle.com/javase/7/docs/technotes/tools/windows/jarsigner.html
 
 * Newlines significant per entry
 * The hash of the manifest in the signature file will be MINUS the attributes at the top
+
+https://justanapplication.wordpress.com/tag/pkcs7/
+
+It is the SHA-1 digest of the CERT.SF file which has been encrypted using the private key corresponding to the public key contained in the accompanying certificate.

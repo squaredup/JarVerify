@@ -42,9 +42,7 @@ namespace JarVerify.Manifest
 
             using (StreamReader reader = new StreamReader(source.Open(path)))
             {
-                manifest.OriginalBody = reader.ReadToEnd();
-
-                string[] lines = manifest.OriginalBody.Split(
+                string[] lines = reader.ReadToEnd().Split(
                     new char[] { (char)10, (char)13 }, StringSplitOptions.RemoveEmptyEntries);
 
                 // Manifest files wrap at 70 (or 72 w/ CR+LR) characters
@@ -121,6 +119,8 @@ namespace JarVerify.Manifest
         {
             if (line.Length > 70)
             {
+                // TODO: Should really be recursive 
+
                 return line.Substring(0, 70) + Environment.NewLine + " " + line.Substring(70);
             }
             else

@@ -2,8 +2,11 @@
 using JarVerify.Cryptography;
 using JarVerify.Manifest;
 using JarVerify.Util;
+using Org.BouncyCastle.Cms;
+using Org.BouncyCastle.X509;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,22 +20,33 @@ namespace JarVerify
         /// <summary>
         /// Regardless of signing state the files in the JAR do not match the manifest
         /// </summary>
-        HashMismatch,
+        FundamentalHashMismatch,
+        
+        SignedValid,
 
+        SignedInvalid           
+    }
 
-        SignedValid
+    public class VerificationResult
+    {
+        public bool Valid { get; set; }
+        public SigningStatus Status { get; set; }
     }
 
     public static class Verify
     {
-        public static SigningStatus Jar(string filename, bool nonStandardCountCheck = true)
+        public static VerificationResult Jar(string filename, IVerificationCertificates certificates, bool nonStandardCountCheck = true)
         {
             using (IJar jar = new Jar(filename))
             {
                 // Unsigned ZIP and probably not even a JAR
                 if (!jar.Contains(@"META-INF\MANIFEST.MF"))
                 {
-                    return SigningStatus.NotSigned;
+                    return new VerificationResult
+                    {
+                        Status = SigningStatus.NotSigned,
+                        Valid = false
+                    };
                 }
                 
                 IManifestLoader manifestLoader = new ManifestLoader();
@@ -42,7 +56,7 @@ namespace JarVerify
                 if (nonStandardCountCheck)
                 {
                     // Non-standard check: Ensure that no unsigned files have been ADDED
-                    // to the JAR (file qty. except signature itself must match manifest entries)
+                    // to the JAR (file qty. [except signature itself] must match manifest entries)
                     //
                     int nonManifestFiles = jar.NonSignatureFiles().Count();
 
@@ -50,10 +64,16 @@ namespace JarVerify
                     {
                         Log.Message($"Expected {centralManifest.Entries.Count} file(s) found {nonManifestFiles}");
 
-                        return SigningStatus.HashMismatch;
+                        return new VerificationResult
+                        {
+                            Status = SigningStatus.FundamentalHashMismatch,
+                            Valid = false
+                        };
                     }
                 }
 
+                // Verify the hashes of every file in the JAR
+                //
                 using (var h = new Hasher())
                 {
                     Log.Message($"Central manifest contains {centralManifest.Entries.Count} entries");
@@ -67,7 +87,11 @@ namespace JarVerify
                         {
                             Log.Message($"{e.Path} has an incorrect digest");
 
-                            return SigningStatus.HashMismatch;
+                            return new VerificationResult
+                            {
+                                Status = SigningStatus.FundamentalHashMismatch,
+                                Valid = false
+                            };
                         }
                     }
                 }
@@ -80,56 +104,34 @@ namespace JarVerify
                 {
                     Log.Message("No signatures detected");
 
-                    return SigningStatus.NotSigned;
+                    return new VerificationResult
+                    {
+                        Status = SigningStatus.NotSigned,
+                        Valid = false
+                    };
                 }
 
                 Log.Message($"{signatures.Count} signature(s) detected");
 
-                foreach (Signature sig in signatures)
+                SignatureVerifier ver = new SignatureVerifier();
+
+                if (ver.Verify(jar, centralManifest, signatures, certificates))
                 {
-                    ManifestData signFile = manifestLoader.Load(jar, sig.ManifestPath);
-
-                    Log.Message($"Signature {sig.BaseName} @ {sig.ManifestPath} with block {sig.Block.Path} type {sig.Block.Type}");
-
-                    Log.Message($"Signing file contains {signFile.Entries.Count} entries");
-
-                    Log.Message($"Expecting main manifest digest of {signFile.ManifestDigest}");
-
-                    using (var h = new Hasher())
+                    return new VerificationResult
                     {
-                        if (centralManifest.ManifestDigest != signFile.ManifestDigest)
-                        {
-                            Log.Message($"Main manifest has unexpected digest {centralManifest.ManifestDigest}");
-
-                            return SigningStatus.HashMismatch;
-                        }
-
-                        int centralEntry = 0;
-
-                        // Take each entry from our sign file
-                        foreach (ManifestEntry signed in signFile.Entries)
-                        {
-                            // And match it up against the equiavalent entry in the main manifest
-                            ManifestEntry central = centralManifest.Entries[centralEntry];
-
-                            centralEntry++;
-                            
-                            Log.Message($"Signed digest check {signed.Path} ({signed.Digest})");
-
-                            // So hash the hash of the text in MANIFEST.MF and compare against the SF hash
-                            if (h.SHA256(central.Original).ToBase64() != signed.Digest)
-                            {
-                                Log.Message($"{signed.Path} does not match {central.Path} in main manifest ({signed.Digest} != {central.Digest})");
-
-                                return SigningStatus.HashMismatch;
-                            }
-                        }
-                    }
-
+                        Status = SigningStatus.SignedValid,
+                        Valid = true
+                    };
                 }
-            }
-
-            return SigningStatus.SignedValid;
+                else
+                {
+                    return new VerificationResult
+                    {
+                        Status = SigningStatus.SignedInvalid,
+                        Valid = false
+                    };
+                }
+            }           
         }
     }
 }

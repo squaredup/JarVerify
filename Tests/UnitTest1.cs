@@ -15,7 +15,13 @@ namespace Tests
         [TestMethod]
         public void TestMethod1()
         {
-            Assert.AreEqual(SigningStatus.SignedValid, Verify.Jar(@"C:\Users\David\Downloads\jenkins.war.zip"));
+            VerificationCertificates certs = new VerificationCertificates();
+            certs.Add("SIGNFILE", File.ReadAllBytes(@"C:\dev\csharp\JarVerify\JarVerify\bin\Debug\example.cer"));
+
+            var result = Verify.Jar(@"C:\dev\csharp\JarVerify\JarVerify\bin\Debug\hw.zip", certs);
+
+            Assert.IsTrue(result.Valid);
+            Assert.AreEqual(SigningStatus.SignedValid, result.Status);
 
             //using (IJar j = new Jar(@"C:\Users\David\Downloads\jenkins.war.zip"))
             //{

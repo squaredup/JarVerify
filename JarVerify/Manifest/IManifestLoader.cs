@@ -10,15 +10,6 @@ namespace JarVerify.Manifest
     public class ManifestData
     {
         /// <summary>
-        /// The entire non-attribute body of the manifest
-        /// </summary>
-        public string OriginalBody
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// The digest stipulated against the main manifest (optional)
         /// </summary>
         public string ManifestDigest
