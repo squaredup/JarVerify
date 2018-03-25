@@ -1,4 +1,4 @@
-<img src="https://img.shields.io/nuget/v/JarVerify.svg"/>&nbsp;<img src="https://ci.appveyor.com/api/projects/status/u1of0xu7724cfyh2?svg=true"/>
+<a href="https://www.nuget.org/packages/JarVerify/" target="_blank"><img src="https://img.shields.io/nuget/v/JarVerify.svg"/></a>&nbsp;<a href="https://ci.appveyor.com/project/DavidR91/jarverify" target="_blank"><img src="https://ci.appveyor.com/api/projects/status/u1of0xu7724cfyh2?svg=true"/></a>
 
 # JarVerify
 Verify the digital signatures of signed JARs (or just any ZIPs signed by `jarsigner`)
