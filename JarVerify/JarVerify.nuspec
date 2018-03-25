@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>JarVerify</id>
+    <version>1.0.0</version>
+    <authors>David Roberts</authors>
+    <owners>Squared Up Ltd.</owners>
+    <licenseUrl>https://github.com/squaredup/JarVerify/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/squaredup/JarVerify</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Verify the digital signatures of signed JAR/ZIP archives</description>
+    <copyright>Copyright 2018</copyright>
+    <tags>JAR ZIP sign pkcs archive digital signature</tags>
+    <dependencies>
+      <dependency id="BouncyCastle.Crypto.dll" version="1.8" />
+    </dependencies>
+  </metadata>
+</package>
