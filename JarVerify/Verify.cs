@@ -22,8 +22,14 @@ namespace JarVerify
         /// </summary>
         FundamentalHashMismatch,
         
+        /// <summary>
+        /// There are signatures and all of them are valid
+        /// </summary>
         SignedValid,
 
+        /// <summary>
+        /// There are signatures and at least one is invalid
+        /// </summary>
         SignedInvalid           
     }
 
@@ -37,7 +43,37 @@ namespace JarVerify
     {
         public static VerificationResult Jar(string filename, IVerificationCertificates certificates, bool nonStandardCountCheck = true)
         {
-            using (IJar jar = new Jar(filename))
+            if (filename.IsNullOrEmpty())
+            {
+                throw new ArgumentNullException(nameof(filename));
+            }
+
+            if (certificates == null)
+            {
+                throw new ArgumentNullException(nameof(certificates));
+            }
+
+            return Jar(new Jar(filename), certificates, nonStandardCountCheck);
+        }
+
+        public static VerificationResult Jar(Stream stream, IVerificationCertificates certificates, bool nonStandardCountCheck = true)
+        {
+            if (stream == null)
+            {
+                throw new ArgumentNullException(nameof(stream));
+            }
+
+            if (certificates == null)
+            {
+                throw new ArgumentNullException(nameof(certificates));
+            }
+
+            return Jar(new Jar(stream), certificates, nonStandardCountCheck);
+        }
+
+        private static VerificationResult Jar(IJar alreadyOpen, IVerificationCertificates certificates, bool nonStandardCountCheck = true)
+        {
+            using (IJar jar = alreadyOpen)
             {
                 // Unsigned ZIP and probably not even a JAR
                 if (!jar.Contains(@"META-INF\MANIFEST.MF"))
@@ -96,8 +132,11 @@ namespace JarVerify
                     }
                 }
 
-                SignatureFinder finder = new SignatureFinder();
-
+                // Detect signatures
+                //
+                //
+                ISignatureFinder finder = new SignatureFinder();
+                
                 List<Signature> signatures = finder.Find(jar);
 
                 if (!signatures.Any())
@@ -113,6 +152,9 @@ namespace JarVerify
 
                 Log.Message($"{signatures.Count} signature(s) detected");
 
+                // Verify signatures
+                //
+                //
                 SignatureVerifier ver = new SignatureVerifier();
 
                 if (ver.Verify(jar, centralManifest, signatures, certificates))

@@ -1,4 +1,5 @@
 ﻿using JarVerify.Manifest;
+using JarVerify.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,10 +9,15 @@ using System.Threading.Tasks;
 
 namespace JarVerify.Container
 {
-    public class SignatureFinder
+    public class SignatureFinder : ISignatureFinder
     {        
         public List<Signature> Find(IJar jar)
         {
+            if (jar == null)
+            {
+                throw new ArgumentNullException(nameof(jar));
+            }
+
             // Signature from base name -> data
             Dictionary<string, Signature> found = new Dictionary<string, Signature>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -22,56 +28,55 @@ namespace JarVerify.Container
                 // Must be in META-INF
                 if (pathParts.Length == 2 && pathParts[0] == "META-INF")
                 {
-                    string filename = pathParts[1];
+                    string filenameOnly = pathParts[1];
 
-                    if (filename.Equals("MANIFEST.MF", StringComparison.InvariantCultureIgnoreCase))
+                    if (filenameOnly.Equals("MANIFEST.MF", StringComparison.InvariantCultureIgnoreCase))
                     {
                         // We don't care about the non-signature manifest
                         continue;
                     }
 
                     // Base name being the actual overall signature name
-                    string baseName = Path.GetFileNameWithoutExtension(filename);
+                    string baseName = Path.GetFileNameWithoutExtension(filenameOnly);
 
-                    // If there is no signature yet for this name, add one 
-                    if (!found.ContainsKey(baseName))
+                    Populate(found.AddOrGet(baseName, () => new Signature
                     {
-                        found.Add(baseName, new Signature
-                        {
-                            BaseName = baseName
-                        }); 
-                    }
-
-                    string extension = Path.GetExtension(filename);
-
-                    Signature sig = found[baseName];
-
-                    switch(extension.Substring(1).ToLowerInvariant())
-                    {
-                        case "rsa":
-                            sig.Block = new SignatureBlockFile
-                            {
-                                Type = SignatureBlockType.RSA, 
-                                Path = candidate
-                            };
-                            break;
-
-                        case "dsa":
-                            sig.Block = new SignatureBlockFile
-                            {
-                                Type = SignatureBlockType.DSA,
-                                Path = candidate
-                            };
-                            break;
-
-                        case "sf":
-                            sig.ManifestPath = candidate;
-                            break;
-                    }
+                        BaseName = baseName
+                    }), 
+                    candidate, filenameOnly);
                 }
             }
 
             return found.Values.ToList();
+        }
+
+        private void Populate(Signature sig, string path, string filenameOnly)
+        {            
+            string extension = Path.GetExtension(filenameOnly);
+            
+            // Determine the signature type OR store the path to the .SF
+            switch (extension.Substring(1).ToLowerInvariant())
+            {
+                case "rsa":
+                    sig.Block = new SignatureBlockFile
+                    {
+                        Type = SignatureBlockType.RSA,
+                        Path = path
+                    };
+                    break;
+
+                case "dsa":
+                    sig.Block = new SignatureBlockFile
+                    {
+                        Type = SignatureBlockType.DSA,
+                        Path = path
+                    };
+                    break;
+
+                case "sf":
+                    sig.ManifestPath = path;
+                    break;
+            }
         }
     }
 }

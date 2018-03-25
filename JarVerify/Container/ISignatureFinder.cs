@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JarVerify.Manifest
-{
+namespace JarVerify.Container
+{  
     /// <summary>
     /// Information about an individual signature (one of possibly many)
     /// </summary>
@@ -21,7 +21,7 @@ namespace JarVerify.Manifest
         }
 
         /// <summary>
-        /// The path to the .SF manifest for this signature
+        /// The path to the .SF manifest within the JAR for this signature
         /// </summary>
         public string ManifestPath
         {
@@ -68,5 +68,18 @@ namespace JarVerify.Manifest
             get;
             set;
         }
+    }
+
+    /// <summary>
+    /// Find a set of signatures within a JAR
+    /// </summary>
+    public interface ISignatureFinder
+    {
+        /// <summary>
+        /// Detect a list of all signatures within a JAR
+        /// </summary>
+        /// <param name="jar">JAR to search</param>
+        /// <returns>set of all detected signatures</returns>
+        List<Signature> Find(IJar jar);
     }
 }

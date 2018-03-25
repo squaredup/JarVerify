@@ -44,11 +44,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Container\ISignatureFinder.cs" />
     <Compile Include="Container\SignatureFinder.cs" />
     <Compile Include="Cryptography\Hasher.cs" />
     <Compile Include="Cryptography\IVerificationCertificates.cs" />
     <Compile Include="Cryptography\SignatureVerifier.cs" />
     <Compile Include="Cryptography\VerificationCertificates.cs" />
+    <Compile Include="Exceptions\ManifestException.cs" />
+    <Compile Include="Exceptions\MissingCertificateException.cs" />
     <Compile Include="Exceptions\JarException.cs" />
     <Compile Include="Container\IJar.cs" />
     <Compile Include="Container\Jar.cs" />
@@ -57,9 +60,9 @@
     <Compile Include="Manifest\IManifestLoader.cs" />
     <Compile Include="Manifest\ManifestEntry.cs" />
     <Compile Include="Manifest\ManifestLoader.cs" />
-    <Compile Include="Manifest\Signature.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\ByteExtensions.cs" />
+    <Compile Include="Util\DictionaryExtensions.cs" />
     <Compile Include="Util\StringExtensions.cs" />
     <Compile Include="Verify.cs" />
   </ItemGroup>
