@@ -31,7 +31,7 @@ For this reason, this library has some non-standard/non-compliant features:
 * RSA and DSA are considered, but only DSA has been tested in practice
 
 # Example
-```
+```C#
 VerificationCertificates certs = new VerificationCertificates();
 certs.Add("SIGNFILE", File.ReadAllBytes("public_certificate.cer")));
 
@@ -44,7 +44,7 @@ Error handling in this library is currently not ideal - many common validation f
 
 For this reason, an expected use might be a structure like the following (if you care _only_ about if the JAR is validly signed and do not care why the JAR is not valid)
 
-```
+```C#
 try
 {
    var result = Verify.Jar("my.jar" certs);
