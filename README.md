@@ -24,6 +24,8 @@ For this reason, this library has some non-standard/non-compliant features:
     * Adding new files to the manifest changes the hash of the manifest file - and therefore invalidates the content of the signature file. If you modify the signature file, you completely invalidate the signature (since the PKCS signing is against the digest of the signature file)
     
 ## Limitations
+* This library assumes that **only** SHA-256 digests are being used. Any other digest type will be ignored and validation will fail
+    * Really, nothing should be using SHA1 or lower any more any way so...
 * No consideration for certificate chains 
     * The anticipated use case is self-signed certificates: for this reason, the certificate chain is not explicitly dealt with and self-signed is not considered invalid
 * RSA and DSA are considered, but only DSA has been tested in practice
