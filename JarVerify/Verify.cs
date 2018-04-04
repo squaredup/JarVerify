@@ -41,7 +41,16 @@ namespace JarVerify
 
     public static class Verify
     {
-        public static VerificationResult Jar(string filename, IVerificationCertificates certificates, bool nonStandardCountCheck = true)
+        /// <summary>
+        /// Perform JAR digital signature verification against a JAR filename on disk
+        /// </summary>
+        /// <param name="filename">JAR filename</param>
+        /// <param name="certificates">certificate to verify / accept against</param>
+        /// <param name="nonStandardCountCheck">whether to perform the additional file count verification check against 
+        /// MANIFEST.MF (recommended if the file is actually an arbitrary ZIP)</param>
+        /// <returns>digital signature verification state of the JAR</returns>
+        public static VerificationResult Jar(string filename, IVerificationCertificates certificates,
+            bool nonStandardCountCheck = true)
         {
             if (filename.IsNullOrEmpty())
             {
@@ -53,10 +62,23 @@ namespace JarVerify
                 throw new ArgumentNullException(nameof(certificates));
             }
 
-            return Jar(new Jar(filename), certificates, nonStandardCountCheck);
+
+            using (IJar jar = new Jar(filename))
+            {
+                return Jar(jar, certificates, nonStandardCountCheck);
+            }
         }
 
-        public static VerificationResult Jar(Stream stream, IVerificationCertificates certificates, bool nonStandardCountCheck = true)
+        /// <summary>
+        /// Perform JAR digital signature verification against a JAR filename on disk
+        /// </summary>
+        /// <param name="stream">JAR file stream</param>
+        /// <param name="certificates">certificate to verify / accept against</param>
+        /// <param name="nonStandardCountCheck">whether to perform the additional file count verification check against 
+        /// MANIFEST.MF (recommended if the file is actually an arbitrary ZIP)</param>
+        /// <returns>digital signature verification state of the JAR</returns>
+        public static VerificationResult Jar(Stream stream, IVerificationCertificates certificates,
+            bool nonStandardCountCheck = true)
         {
             if (stream == null)
             {
@@ -68,37 +90,70 @@ namespace JarVerify
                 throw new ArgumentNullException(nameof(certificates));
             }
 
-            return Jar(new Jar(stream), certificates, nonStandardCountCheck);
+            using (IJar jar = new Jar(stream))
+            {
+                return Jar(jar, certificates, nonStandardCountCheck);
+            }
         }
 
-        private static VerificationResult Jar(IJar alreadyOpen, IVerificationCertificates certificates, bool nonStandardCountCheck = true)
+        /// <summary>
+        /// Perform JAR digital signature verification against a JAR filename on disk
+        /// </summary>
+        /// <param name="jar">JAR container. The caller is expected to dispose this type themselves - it will not be disposed
+        /// by this method</param>
+        /// <param name="certificates">certificate to verify / accept against</param>
+        /// <param name="nonStandardCountCheck">whether to perform the additional file count verification check against 
+        /// MANIFEST.MF (recommended if the file is actually an arbitrary ZIP)</param>
+        /// <returns>digital signature verification state of the JAR</returns>
+        public static VerificationResult Jar(IJar jar, IVerificationCertificates certificates, bool nonStandardCountCheck = true)
         {
-            using (IJar jar = alreadyOpen)
+            // Unsigned ZIP and probably not even a JAR
+            if (!jar.Contains(@"META-INF\MANIFEST.MF"))
             {
-                // Unsigned ZIP and probably not even a JAR
-                if (!jar.Contains(@"META-INF\MANIFEST.MF"))
+                return new VerificationResult
                 {
+                    Status = SigningStatus.NotSigned,
+                    Valid = false
+                };
+            }
+
+            IManifestLoader manifestLoader = new ManifestLoader();
+
+            ManifestData centralManifest = manifestLoader.Load(jar, @"META-INF\MANIFEST.MF");
+
+            if (nonStandardCountCheck)
+            {
+                // Non-standard check: Ensure that no unsigned files have been ADDED
+                // to the JAR (file qty. [except signature itself] must match manifest entries)
+                //
+                int nonManifestFiles = jar.NonSignatureFiles().Count();
+
+                if (centralManifest.Entries.Count != nonManifestFiles)
+                {
+                    Log.Message($"Expected {centralManifest.Entries.Count} file(s) found {nonManifestFiles}");
+
                     return new VerificationResult
                     {
-                        Status = SigningStatus.NotSigned,
+                        Status = SigningStatus.FundamentalHashMismatch,
                         Valid = false
                     };
                 }
-                
-                IManifestLoader manifestLoader = new ManifestLoader();
+            }
 
-                ManifestData centralManifest = manifestLoader.Load(jar, @"META-INF\MANIFEST.MF");
+            // Verify the hashes of every file in the JAR
+            //
+            using (var h = new Hasher())
+            {
+                Log.Message($"Central manifest contains {centralManifest.Entries.Count} entries");
 
-                if (nonStandardCountCheck)
+                foreach (ManifestEntry e in centralManifest.Entries)
                 {
-                    // Non-standard check: Ensure that no unsigned files have been ADDED
-                    // to the JAR (file qty. [except signature itself] must match manifest entries)
-                    //
-                    int nonManifestFiles = jar.NonSignatureFiles().Count();
+                    Log.Message($"Digest check {e.Path} ({e.Digest})");
 
-                    if (centralManifest.Entries.Count != nonManifestFiles)
+                    // Check each file matches the hash in the manifest
+                    if (jar.SHA256(h, e.Path).ToBase64() != e.Digest)
                     {
-                        Log.Message($"Expected {centralManifest.Entries.Count} file(s) found {nonManifestFiles}");
+                        Log.Message($"{e.Path} has an incorrect digest");
 
                         return new VerificationResult
                         {
@@ -107,73 +162,49 @@ namespace JarVerify
                         };
                     }
                 }
+            }
 
-                // Verify the hashes of every file in the JAR
-                //
-                using (var h = new Hasher())
+            // Detect signatures
+            //
+            //
+            ISignatureFinder finder = new SignatureFinder();
+
+            List<Signature> signatures = finder.Find(jar);
+
+            if (!signatures.Any())
+            {
+                Log.Message("No signatures detected");
+
+                return new VerificationResult
                 {
-                    Log.Message($"Central manifest contains {centralManifest.Entries.Count} entries");
+                    Status = SigningStatus.NotSigned,
+                    Valid = false
+                };
+            }
 
-                    foreach (ManifestEntry e in centralManifest.Entries)
-                    {
-                        Log.Message($"Digest check {e.Path} ({e.Digest})");
+            Log.Message($"{signatures.Count} signature(s) detected");
 
-                        // Check each file matches the hash in the manifest
-                        if (jar.SHA256(h, e.Path).ToBase64() != e.Digest)
-                        {
-                            Log.Message($"{e.Path} has an incorrect digest");
+            // Verify signatures
+            //
+            //
+            SignatureVerifier ver = new SignatureVerifier();
 
-                            return new VerificationResult
-                            {
-                                Status = SigningStatus.FundamentalHashMismatch,
-                                Valid = false
-                            };
-                        }
-                    }
-                }
-
-                // Detect signatures
-                //
-                //
-                ISignatureFinder finder = new SignatureFinder();
-                
-                List<Signature> signatures = finder.Find(jar);
-
-                if (!signatures.Any())
+            if (ver.Verify(jar, centralManifest, signatures, certificates))
+            {
+                return new VerificationResult
                 {
-                    Log.Message("No signatures detected");
-
-                    return new VerificationResult
-                    {
-                        Status = SigningStatus.NotSigned,
-                        Valid = false
-                    };
-                }
-
-                Log.Message($"{signatures.Count} signature(s) detected");
-
-                // Verify signatures
-                //
-                //
-                SignatureVerifier ver = new SignatureVerifier();
-
-                if (ver.Verify(jar, centralManifest, signatures, certificates))
+                    Status = SigningStatus.SignedValid,
+                    Valid = true
+                };
+            }
+            else
+            {
+                return new VerificationResult
                 {
-                    return new VerificationResult
-                    {
-                        Status = SigningStatus.SignedValid,
-                        Valid = true
-                    };
-                }
-                else
-                {
-                    return new VerificationResult
-                    {
-                        Status = SigningStatus.SignedInvalid,
-                        Valid = false
-                    };
-                }
-            }           
+                    Status = SigningStatus.SignedInvalid,
+                    Valid = false
+                };
+            }
         }
     }
 }
