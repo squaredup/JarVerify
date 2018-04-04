@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>JarVerify</id>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <authors>David Roberts</authors>
     <owners>Squared Up Ltd.</owners>
     <licenseUrl>https://github.com/squaredup/JarVerify/blob/master/LICENSE</licenseUrl>
