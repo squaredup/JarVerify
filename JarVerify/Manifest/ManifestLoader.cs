@@ -85,8 +85,6 @@ namespace JarVerify.Manifest
         {
             for (int ptr = 0; ptr < lines.Length; ptr++)
             {
-                string line = lines[ptr];
-
                 // Split each line into  NAME: VALUE
                 string[] parts = lines[ptr].Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -141,10 +139,12 @@ namespace JarVerify.Manifest
             foreach (string line in lines)
             {
                 // Starting with a space indicates a wrap from the previous line
-                if (line.TrimStart() != line)
+                if (char.IsWhiteSpace(line[0]))
                 {
-                    // Append this line onto the previous line
-                    rebuilt[rebuilt.Count - 1] += line.TrimStart();
+                    // Append this line onto the previous line, removing the first character
+                    // Intentionally don't trim here as the line could have two spaces, e.g. 
+                    // if the string was split on a space in the filename.
+                    rebuilt[rebuilt.Count - 1] += line.Substring(1);
                 }
                 else
                 {
