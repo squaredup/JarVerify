@@ -1,4 +1,4 @@
-<a href="https://www.nuget.org/packages/JarVerify/" target="_blank"><img src="https://img.shields.io/nuget/v/JarVerify.svg"/></a>&nbsp;<a href="https://ci.appveyor.com/project/DavidR91/jarverify" target="_blank"><img src="https://ci.appveyor.com/api/projects/status/u1of0xu7724cfyh2?svg=true"/></a>
+<a href="https://www.nuget.org/packages/SquaredUp.JarVerify/" target="_blank"><img src="https://img.shields.io/nuget/v/SquaredUp.JarVerify.svg"/></a>&nbsp;<a href="https://dev.azure.com/squaredup-eng/jar-verify/_build/latest?definitionId=37" target="_blank"><img src="https://dev.azure.com/squaredup-eng/jar-verify/_apis/build/status/jar-verify-CI?branchName=master"/></a>
 
 # JarVerify
 Verify the digital signatures of signed JARs (or just any ZIPs signed by `jarsigner`)
