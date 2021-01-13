@@ -3,18 +3,28 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <PackageId>SquaredUp.JarVerify</PackageId>
-    <Version>1.2.0</Version>
+    <Version>2.0.0-alpha</Version>
     <Authors>Squared Up Ltd.</Authors>
     <Company>Squared Up Ltd.</Company>
-    <PackageLicenseExpression>https://github.com/squaredup/JarVerify/blob/master/LICENSE</PackageLicenseExpression>
+    <PackageLicenseExpression></PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/squaredup/JarVerify</PackageProjectUrl>
     <Description>Verify the digital signatures of signed JAR/ZIP archives</Description>
     <Copyright>Copyright 2020</Copyright>
     <PackageTags>JAR ZIP sign pkcs archive digital signature</PackageTags>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BouncyCastle.NetCore" Version="1.8.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
