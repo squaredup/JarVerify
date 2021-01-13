@@ -47,7 +47,9 @@ namespace JarVerify.Container
                 }
             }
 
-            return found.Values.ToList();
+            return found.Values
+                .Where(s => !string.IsNullOrEmpty(s.ManifestPath) || s.Block != null)
+                .ToList();
         }
 
         private void Populate(Signature sig, string path, string filenameOnly)
