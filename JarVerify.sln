@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2002
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JarVerify", "JarVerify\JarVerify.csproj", "{A55084DF-3C72-40C1-8ABC-E0205D486CE4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JarVerify", "JarVerify\JarVerify.csproj", "{D05530EF-10FA-42B5-AE29-2BA49DAF7455}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A55084DF-3C72-40C1-8ABC-E0205D486CE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A55084DF-3C72-40C1-8ABC-E0205D486CE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A55084DF-3C72-40C1-8ABC-E0205D486CE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A55084DF-3C72-40C1-8ABC-E0205D486CE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D05530EF-10FA-42B5-AE29-2BA49DAF7455}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D05530EF-10FA-42B5-AE29-2BA49DAF7455}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D05530EF-10FA-42B5-AE29-2BA49DAF7455}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D05530EF-10FA-42B5-AE29-2BA49DAF7455}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {BEAA7EA1-059E-402B-9BF5-82D90C3DAE6A}
+		SolutionGuid = {A89CC388-3072-495B-8054-456A7F635870}
 	EndGlobalSection
 EndGlobal
